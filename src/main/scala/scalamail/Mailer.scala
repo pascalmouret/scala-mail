@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.util.Properties
 import javax.mail.internet.MimeMessage
-import javax.mail.{PasswordAuthentication, Message, Transport, Session}
+import javax.mail._
 
 
 object Mailer {
@@ -34,7 +34,7 @@ private[scalamail] class Mailer(config: MailConfig) {
     }
 
     val credentials = config.credentials.map { credentials =>
-      new javax.mail.Authenticator {
+      new Authenticator {
         protected override def getPasswordAuthentication() =
           new PasswordAuthentication(credentials.user, credentials.password)
       }
