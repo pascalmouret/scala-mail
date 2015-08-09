@@ -1,10 +1,10 @@
 package scalamail
 
+
 import scala.concurrent.Future
-import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import java.util.Properties
+import java.util.{Date, Properties}
 import javax.mail.internet.MimeMessage
 import javax.mail._
 
@@ -56,7 +56,10 @@ private[scalamail] class Mailer(config: MailConfig) {
       envelope.bcc.foreach(_.foreach(setRecipient(Message.RecipientType.BCC, _)))
       envelope.replyTo.foreach(replyTo => setReplyTo(Array(replyTo)))
       setSubject(envelope.subject)
-      setText(envelope.text)
+      envelope.content match {
+        case t: TextPart => setText(t.payload)
+        case p: MailPart => setContent(p.getMultipart)
+      }
     }
 
   def send(envelope: Envelope): Future[Unit] = Future {
