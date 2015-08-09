@@ -56,6 +56,7 @@ private[scalamail] class Mailer(config: MailConfig) {
       envelope.bcc.foreach(_.foreach(setRecipient(Message.RecipientType.BCC, _)))
       envelope.replyTo.foreach(replyTo => setReplyTo(Array(replyTo)))
       setSubject(envelope.subject)
+      setSentDate(new Date())
       envelope.content match {
         case t: TextPart => setText(t.payload)
         case p: MailPart => setContent(p.getMultipart)
