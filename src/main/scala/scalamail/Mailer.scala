@@ -22,6 +22,9 @@ private[scalamail] class Mailer(config: MailConfig) {
   def withTtls: Mailer =
     new Mailer(config.copy(ttls = true))
 
+  def withDebug: Mailer =
+    new Mailer(config.copy(debug = true))
+
   private def createSession: Session = {
     val properties = new Properties {
       put("mail.smtp.host", config.host)
@@ -40,7 +43,9 @@ private[scalamail] class Mailer(config: MailConfig) {
       }
     }
 
-    Session.getInstance(properties, credentials.orNull)
+    val session = Session.getInstance(properties, credentials.orNull)
+    if (config.debug) session.setDebug(true)
+    session
   }
 
   private def createMessage(envelope: Envelope): MimeMessage =
