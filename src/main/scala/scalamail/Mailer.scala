@@ -10,20 +10,21 @@ import javax.mail._
 
 
 object Mailer {
-  def apply(host: String, port: Int): Mailer = new Mailer(MailConfig(host, port))
+  def apply(config: MailConfig): Mailer = new Mailer(config)
+  def apply(host: String, port: Int): Mailer = Mailer(MailConfig(host, port))
 }
 
 private[scalamail] class Mailer(config: MailConfig) {
   lazy private val session = createSession
 
   def withCredentials(user: String, password: String): Mailer =
-    new Mailer(config.copy(credentials = Some(Credentials(user, password))))
+    Mailer(config.copy(credentials = Some(Credentials(user, password))))
 
   def withTtls: Mailer =
-    new Mailer(config.copy(ttls = true))
+    Mailer(config.copy(ttls = true))
 
   def withDebug: Mailer =
-    new Mailer(config.copy(debug = true))
+    Mailer(config.copy(debug = true))
 
   private def createSession: Session = {
     val properties = new Properties {
@@ -58,7 +59,7 @@ private[scalamail] class Mailer(config: MailConfig) {
       setSubject(envelope.subject)
       setSentDate(new Date())
       envelope.content match {
-        case t: TextPart => setText(t.payload)
+        case t: Text => setText(t.payload)
         case p: MailPart => setContent(p.getMultipart)
       }
     }

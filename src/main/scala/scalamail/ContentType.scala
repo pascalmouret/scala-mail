@@ -1,9 +1,6 @@
 package scalamail
 
-abstract class ContentType {
-  val primary: String
-  val subtype: String
-
+abstract class ContentType(val primary: String, val subtype: String) {
   def getPrimary: String = primary
   def getSubytpe: String = subtype
   override def toString: String = s"$subtype/$primary"
@@ -21,14 +18,14 @@ object ContentType {
     }
   }
 
-  protected class Custom(override val primary: String, override val subtype: String) extends ContentType
+  protected class Custom(override val primary: String, override val subtype: String) extends ContentType(primary, subtype)
 
   // Containers
-  case object MixedMultipart extends Custom("multipart", "mixed")
-  case object AlternativeMultipart extends Custom("multipart", "alternative")
-  case object RelatedMultipart extends Custom("multipart", "related")
+  case object MixedMultipart extends ContentType("multipart", "mixed")
+  case object AlternativeMultipart extends ContentType("multipart", "alternative")
+  case object RelatedMultipart extends ContentType("multipart", "related")
 
   // Content
-  case object Html extends Custom("text", "html")
-  case object Text extends Custom("text", "plain")
+  case object Html extends ContentType("text", "html")
+  case object Text extends ContentType("text", "plain")
 }

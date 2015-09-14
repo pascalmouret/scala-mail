@@ -3,15 +3,17 @@ package scalamail
 import javax.mail.internet.{MimeBodyPart, MimeMultipart}
 
 
-trait MailPart {
+sealed trait MailPart {
   val contentType: ContentType
+  val headers: Seq[(String, String)] = Seq.empty[(String, String)]
+
   def compile: MimeBodyPart
   def getMultipart: MimeMultipart
 
   implicit def contentTypeToString(ct: ContentType): String = ct.toString
 }
 
-trait Container extends MailPart {
+abstract class Container(val contentType: ContentType) extends MailPart {
   val segments: Seq[MailPart]
 
   def getMultipart: MimeMultipart = new MimeMultipart(contentType.getSubytpe) {
@@ -25,18 +27,12 @@ trait Container extends MailPart {
   }
 }
 
-final case class MixedContainer(override val segments: Seq[MailPart]) extends Container {
-  val contentType = ContentType.MixedMultipart
-}
-final case class AlternativeContainer(override val segments: Seq[MailPart]) extends Container {
-  val contentType = ContentType.AlternativeMultipart
-}
-final case class RelatedContainer(override val segments: Seq[MailPart]) extends Container {
-  val contentType = ContentType.RelatedMultipart
-}
+final case class MixedContainer(segments: Seq[MailPart]) extends Container(ContentType.MixedMultipart)
+final case class AlternativeContainer(segments: Seq[MailPart]) extends Container(ContentType.AlternativeMultipart)
+final case class RelatedContainer(segments: Seq[MailPart]) extends Container(ContentType.RelatedMultipart)
 
-trait Content extends MailPart {
-  val payload: String
+abstract class Content(val contentType: ContentType) extends MailPart {
+  val payload: Any
 
   def getMultipart: MimeMultipart = new MimeMultipart(contentType.getSubytpe) {
     addBodyPart(compile)
@@ -47,6 +43,5 @@ trait Content extends MailPart {
   }
 }
 
-final case class TextPart(override val payload: String) extends Content { val contentType = ContentType.Text }
-final case class HtmlPart(override val payload: String) extends Content { val contentType = ContentType.Html }
-//final case class Attachment(override val payload: Array[Byte], override val contentType: ContentType) extends Content
+final case class Text(payload: String) extends Content(ContentType.Text)
+final case class Html(payload: String) extends Content(ContentType.Html)
