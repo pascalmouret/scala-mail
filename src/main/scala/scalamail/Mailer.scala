@@ -37,7 +37,7 @@ private[scalamail] class Mailer(config: MailConfig) {
       }
     }
 
-    val credentials = config.credentials.map { credentials =>
+    val credentials = config.credentials map { credentials =>
       new Authenticator {
         protected override def getPasswordAuthentication() =
           new PasswordAuthentication(credentials.user, credentials.password)
@@ -49,22 +49,7 @@ private[scalamail] class Mailer(config: MailConfig) {
     session
   }
 
-  private def createMessage(envelope: Envelope): MimeMessage =
-    new MimeMessage(session) {
-      setFrom(envelope.from)
-      envelope.to.foreach(setRecipient(Message.RecipientType.TO, _))
-      envelope.cc.foreach(_.foreach(setRecipient(Message.RecipientType.CC, _)))
-      envelope.bcc.foreach(_.foreach(setRecipient(Message.RecipientType.BCC, _)))
-      envelope.replyTo.foreach(replyTo => setReplyTo(Array(replyTo)))
-      setSubject(envelope.subject)
-      setSentDate(new Date())
-      envelope.content match {
-        case t: Text => setText(t.payload)
-        case p: MailPart => setContent(p.getMultipart)
-      }
-    }
-
   def send(envelope: Envelope): Future[Unit] = Future {
-    Transport.send(createMessage(envelope))
+    Transport.send(MessageBuilder(envelope, session))
   }
 }

@@ -1,9 +1,14 @@
-package scalamail
+package scalamail.content
 
-abstract class ContentType(val primary: String, val subtype: String) {
-  def getPrimary: String = primary
-  def getSubytpe: String = subtype
-  override def toString: String = s"$subtype/$primary"
+sealed trait ContentTypeInterface {
+  def primary: String
+  def subtype: String
+  def fullType: String
+  override def toString: String = fullType
+}
+
+abstract class ContentType(val primary: String, val subtype: String) extends ContentTypeInterface {
+  def fullType: String = s"$subtype/$primary"
 }
 
 object ContentType {
